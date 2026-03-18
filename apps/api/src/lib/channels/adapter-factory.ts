@@ -1,26 +1,29 @@
 /**
  * Adapter Factory
  *
- * Returns the appropriate channel adapter based on TEST_MODE environment variable.
- * When TEST_MODE=true, returns mock adapters that log to database.
- * When TEST_MODE=false (production), returns real adapters.
+ * Adapter resolution order:
+ * 1. TEST_MODE=true → mock adapters
+ * 2. KAPABLE_CHANNEL_URL set → Kapable Channel Service adapters
+ * 3. Default → direct Resend/Twilio adapters
  */
 
 import { ResendAdapter } from './adapters/resend-adapter';
 import { TwilioSMSAdapter, getTwilioSMSAdapter } from './adapters/twilio-sms-adapter';
+import { KapableSMSAdapter, getKapableSMSAdapter } from './adapters/kapable-sms-adapter';
 import { getMockResendAdapter, MockResendAdapter } from '../../test/mocks/mock-resend';
 import { getMockTwilioSMSAdapter, MockTwilioSMSAdapter } from '../../test/mocks/mock-twilio';
 import type { BaseChannelAdapter } from './base-adapter';
 
 // ============================================================================
-// TEST MODE CHECK
+// MODE CHECKS
 // ============================================================================
 
-/**
- * Check if TEST_MODE is enabled
- */
 export function isTestModeEnabled(): boolean {
   return process.env.TEST_MODE === 'true';
+}
+
+function useKapableChannel(): boolean {
+  return !!(process.env.KAPABLE_CHANNEL_URL && process.env.KAPABLE_CHANNEL_KEY && process.env.KAPABLE_PROJECT_ID);
 }
 
 // ============================================================================
@@ -29,16 +32,18 @@ export function isTestModeEnabled(): boolean {
 
 let emailAdapter: ResendAdapter | MockResendAdapter | null = null;
 
-/**
- * Get the appropriate email adapter based on TEST_MODE
- */
 export function getEmailAdapter(): ResendAdapter | MockResendAdapter {
   if (!emailAdapter) {
     if (isTestModeEnabled()) {
-      console.log('[AdapterFactory] TEST_MODE enabled - using MockResendAdapter');
+      console.log('[AdapterFactory] TEST_MODE - using MockResendAdapter');
       emailAdapter = getMockResendAdapter();
+    } else if (useKapableChannel()) {
+      console.log('[AdapterFactory] Kapable Channel - email routed via platform');
+      // ResendAdapter still used for the adapter interface, but the provider
+      // (getResendProvider) routes through Kapable internally
+      emailAdapter = new ResendAdapter();
     } else {
-      console.log('[AdapterFactory] Production mode - using ResendAdapter');
+      console.log('[AdapterFactory] Direct Resend - using ResendAdapter');
       emailAdapter = new ResendAdapter();
     }
   }
@@ -49,18 +54,18 @@ export function getEmailAdapter(): ResendAdapter | MockResendAdapter {
 // SMS ADAPTER FACTORY
 // ============================================================================
 
-let smsAdapter: TwilioSMSAdapter | MockTwilioSMSAdapter | null = null;
+let smsAdapter: TwilioSMSAdapter | KapableSMSAdapter | MockTwilioSMSAdapter | null = null;
 
-/**
- * Get the appropriate SMS adapter based on TEST_MODE
- */
-export function getSMSAdapter(): TwilioSMSAdapter | MockTwilioSMSAdapter {
+export function getSMSAdapter(): TwilioSMSAdapter | KapableSMSAdapter | MockTwilioSMSAdapter {
   if (!smsAdapter) {
     if (isTestModeEnabled()) {
-      console.log('[AdapterFactory] TEST_MODE enabled - using MockTwilioSMSAdapter');
+      console.log('[AdapterFactory] TEST_MODE - using MockTwilioSMSAdapter');
       smsAdapter = getMockTwilioSMSAdapter();
+    } else if (useKapableChannel()) {
+      console.log('[AdapterFactory] Kapable Channel - SMS routed via platform');
+      smsAdapter = getKapableSMSAdapter();
     } else {
-      console.log('[AdapterFactory] Production mode - using TwilioSMSAdapter');
+      console.log('[AdapterFactory] Direct Twilio - using TwilioSMSAdapter');
       smsAdapter = getTwilioSMSAdapter();
     }
   }
