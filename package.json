@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "bun run --filter './apps/*' dev",
     "build": "bun run --filter './packages/*' build && bun run --filter './apps/*' build",
+    "start": "sh -c 'if [ \"$APP_TARGET\" = \"api\" ]; then cd apps/api && exec bun src/index.ts; else cd apps/web && exec ./node_modules/.bin/react-router-serve ./build/server/index.js; fi'",
     "test": "bun test",
     "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter './apps/*' typecheck",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules packages/*/dist apps/*/dist",
