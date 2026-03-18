@@ -6,17 +6,34 @@ GrowthFin is a CRM application being migrated from SignalDB v1 to the Kapable pl
 Source: `/Users/hgeldenhuys/WebstormProjects/growthfin/`
 Migration plan: `docs/plans/2026-03-18-growthfin-migration.md` (in parent kapable repo)
 
-## Current Status: Phase 2 Complete (Database + Local Dev)
+## Current Status: DEPLOYED on Kapable
 
-The api + web apps and all 10 packages build cleanly. Database is set up locally and both servers run.
+Both API and Web apps are deployed and running on the Kapable platform.
+
+### Production URLs
+- **Web**: https://growthfin-web.kapable.run (React Router 7 SSR)
+- **API**: https://growthfin-api.kapable.run (ElysiaJS)
+- **Swagger**: https://growthfin-api.kapable.run/swagger
+- **Login**: admin@growthfin.dev / GrowthFin2026
+
+### Kapable App IDs
+- **API**: `285ae42c-ce2e-443f-a38c-bb42907888ba` (port 3032)
+- **Web**: `b1504205-527f-4cac-a4fb-4bfb35b85a01` (port 3033)
 
 ### Phase roadmap
 - **Phase 1** (DONE): Scaffold — copy api + web, get building
-- **Phase 2** (DONE): Database setup — local Postgres, 135 tables, dev servers running
-- **Phase 3**: Replace SignalDB auth with Kapable auth
-- **Phase 4**: Migrate data layer from Drizzle/direct-DB to Kapable Data API
-- **Phase 5**: Replace channels/providers with Kapable platform services
-- **Phase 6**: Deploy as Kapable Connect App
+- **Phase 2** (DONE): Database setup — local + production Postgres, 135 tables
+- **Phase 3** (DEFERRED): Replace BetterAuth with Kapable auth — works standalone for now
+- **Phase 4** (DEFERRED): Migrate real-time — PostgreSQL LISTEN/NOTIFY works with own DB
+- **Phase 5** (DEFERRED): Service swaps — existing adapters work, BYOK when needed
+- **Phase 6** (DONE): Deploy as Kapable Connect App — both API + Web running
+
+### Production Infrastructure
+- **Database**: `growthfin` on kapable-prod PostgreSQL (135 tables, kapable user)
+- **DB access**: socat proxy on `10.34.0.1:5432` (growthfin-pg-proxy.service)
+- **API container**: `kap-kapable-growthfin-api-production-bg` (IP: 10.34.45.24)
+- **Web container**: `kap-kapable-growthfin-web-production-bg` (IP: 10.34.145.92)
+- **Workspace ID**: `5d58d045-b743-46a2-8d39-86fd66d418fc`
 
 ## Running Locally
 
