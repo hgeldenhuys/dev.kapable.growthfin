@@ -1,0 +1,18 @@
+{
+  "name": "@kapable/db",
+  "version": "0.1.0",
+  "description": "Database access for Kapable apps",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "postgres": "^3.4.0"
+  },
+  "license": "MIT"
+}

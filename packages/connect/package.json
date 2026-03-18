@@ -1,0 +1,61 @@
+{
+  "name": "@signaldb-live/connect",
+  "version": "0.1.0",
+  "description": "SDK for SignalDB Connect apps — database, SSE, platform services, and auth helpers",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./db": {
+      "import": "./dist/db.js",
+      "types": "./dist/db.d.ts"
+    },
+    "./sse": {
+      "import": "./dist/sse.js",
+      "types": "./dist/sse.d.ts"
+    },
+    "./platform": {
+      "import": "./dist/platform.js",
+      "types": "./dist/platform.d.ts"
+    },
+    "./migrate": {
+      "import": "./dist/migrate.js",
+      "types": "./dist/migrate.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts src/db.ts src/sse.ts src/platform.ts src/migrate.ts --outdir dist --target node --external postgres --external @signaldb-live/connect-auth && bun run build:types",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist"
+  },
+  "dependencies": {
+    "postgres": "^3.4.0"
+  },
+  "peerDependencies": {
+    "@signaldb-live/connect-auth": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@signaldb-live/connect-auth": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "signaldb",
+    "connect",
+    "sdk",
+    "database",
+    "sse",
+    "platform"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,40 @@
+[Unit]
+Description=SignalDB AI Dev Daemon - Multi-org Agent Lifecycle Management
+Documentation=https://signaldb.live/docs/ai-dev
+After=network.target postgresql.service signaldb-api.service
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/signaldb/apps/api
+
+# Load environment variables
+EnvironmentFile=/etc/signaldb/api.env
+
+# Main daemon process
+ExecStart=/home/deploy/.bun/bin/bun run src/services/ai-dev-daemon.ts
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Process management
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/sdb_*/.claude
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=signaldb-ai-dev-daemon
+
+[Install]
+WantedBy=multi-user.target

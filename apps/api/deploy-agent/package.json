@@ -1,0 +1,11 @@
+{
+  "name": "@signaldb/deploy-agent",
+  "version": "1.0.0",
+  "description": "SignalDB Connect deploy agent — host-level service for container lifecycle, deployments, and terminal access",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}

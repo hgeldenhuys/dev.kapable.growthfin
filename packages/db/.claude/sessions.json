@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "sessions": {
+    "11c36d87-4df0-4c52-9a0c-98e936a31542": {
+      "name": "doubtful-scorpion",
+      "created": "2025-12-07T00:35:27.824Z",
+      "source": "startup",
+      "manual": false
+    },
+    "827aec6e-5c0a-4f93-9285-5944ceda9654": {
+      "name": "satisfied-echidna",
+      "created": "2025-12-08T09:30:05.330Z",
+      "source": "startup",
+      "manual": false
+    },
+    "0439068b-6256-4993-9e49-aa87f45ab133": {
+      "name": "breakable-worm",
+      "created": "2025-12-09T04:21:05.011Z",
+      "source": "startup",
+      "manual": false
+    }
+  }
+}

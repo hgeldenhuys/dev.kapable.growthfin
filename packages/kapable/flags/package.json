@@ -1,0 +1,18 @@
+{
+  "name": "@kapable/flags",
+  "version": "0.1.0",
+  "description": "Feature toggle evaluation for Kapable apps",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@kapable/internal": "workspace:*"
+  },
+  "license": "MIT"
+}

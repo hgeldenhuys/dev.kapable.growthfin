@@ -1,0 +1,82 @@
+<testsuites id="" name="" tests="39" failures="0" skipped="0" errors="0" time="27.607691000000003">
+<testsuite name="crm/routes-sanity.spec.ts" timestamp="2026-01-06T18:46:18.334Z" hostname="chromium" tests="39" failures="0" skipped="0" time="21.554" errors="0">
+<testcase name="CRM Routes Sanity Tests › CRM Index › CRM dashboard loads" classname="crm/routes-sanity.spec.ts" time="0.814">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Contacts Module › contacts list loads" classname="crm/routes-sanity.spec.ts" time="0.664">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Contacts Module › new contact form loads" classname="crm/routes-sanity.spec.ts" time="0.692">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Contacts Module › contact import page loads" classname="crm/routes-sanity.spec.ts" time="0.635">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › leads list loads" classname="crm/routes-sanity.spec.ts" time="0.615">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › new lead form loads" classname="crm/routes-sanity.spec.ts" time="0.667">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › lead import page loads" classname="crm/routes-sanity.spec.ts" time="0.66">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › lead segments list loads" classname="crm/routes-sanity.spec.ts" time="0.762">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › new segment form loads" classname="crm/routes-sanity.spec.ts" time="0.88">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › lead lists page loads" classname="crm/routes-sanity.spec.ts" time="0.618">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › my queue page loads" classname="crm/routes-sanity.spec.ts" time="0.459">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › bulk operations page loads" classname="crm/routes-sanity.spec.ts" time="0.513">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Leads Module › data quality page loads" classname="crm/routes-sanity.spec.ts" time="0.626">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Accounts Module › accounts list loads" classname="crm/routes-sanity.spec.ts" time="0.446">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Accounts Module › new account form loads" classname="crm/routes-sanity.spec.ts" time="0.541">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Opportunities Module › opportunities list loads" classname="crm/routes-sanity.spec.ts" time="0.543">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Campaigns Module › campaigns list loads" classname="crm/routes-sanity.spec.ts" time="0.576">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Campaigns Module › new campaign form loads" classname="crm/routes-sanity.spec.ts" time="0.466">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Campaigns Module › campaign templates list loads" classname="crm/routes-sanity.spec.ts" time="0.517">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Lists Module › lists page loads" classname="crm/routes-sanity.spec.ts" time="0.423">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Activities Module › activities list loads" classname="crm/routes-sanity.spec.ts" time="0.487">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Analytics Module › analytics dashboard loads" classname="crm/routes-sanity.spec.ts" time="0.412">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Enrichment Module › enrichment list loads" classname="crm/routes-sanity.spec.ts" time="0.43">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Enrichment Module › new enrichment job loads" classname="crm/routes-sanity.spec.ts" time="0.607">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Enrichment Module › enrichment templates loads" classname="crm/routes-sanity.spec.ts" time="0.426">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Automation Module › workflows list loads" classname="crm/routes-sanity.spec.ts" time="0.474">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Automation Module › new workflow form loads" classname="crm/routes-sanity.spec.ts" time="0.635">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Compliance Module › compliance dashboard loads" classname="crm/routes-sanity.spec.ts" time="0.475">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Compliance Module › consent management loads" classname="crm/routes-sanity.spec.ts" time="0.604">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Compliance Module › KYC management loads" classname="crm/routes-sanity.spec.ts" time="0.455">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Research Module › research sessions list loads" classname="crm/routes-sanity.spec.ts" time="0.501">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Predictions Module › predictions dashboard loads" classname="crm/routes-sanity.spec.ts" time="0.403">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Agent Module › agent dashboard loads" classname="crm/routes-sanity.spec.ts" time="0.426">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Agent Module › agent performance loads" classname="crm/routes-sanity.spec.ts" time="0.589">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Batches Module › batches list loads" classname="crm/routes-sanity.spec.ts" time="0.499">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Email Templates Module › email templates list loads" classname="crm/routes-sanity.spec.ts" time="0.402">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Timeline Module › timeline view loads" classname="crm/routes-sanity.spec.ts" time="0.677">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Tasks Module › tasks view loads" classname="crm/routes-sanity.spec.ts" time="0.443">
+</testcase>
+<testcase name="CRM Routes Sanity Tests › Search Module › search page loads" classname="crm/routes-sanity.spec.ts" time="0.492">
+</testcase>
+</testsuite>
+</testsuites>

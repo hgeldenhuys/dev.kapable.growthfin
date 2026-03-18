@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrowthFin CRM — Staff Onboarding Checklist</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #1e293b;
+    --muted: #64748b; --accent: #2563eb; --green: #16a34a; --red: #dc2626;
+    --amber: #d97706; --purple: #7c3aed; --slate: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 0 0 60px 0; }
+
+  .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 32px 24px; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header p { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+  .header-meta { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .header-meta label { font-size: 13px; color: #94a3b8; }
+  .header-meta input { background: #475569; border: 1px solid #64748b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 13px; width: 160px; }
+  .header-meta input::placeholder { color: #94a3b8; }
+
+  .progress-bar-container { margin-top: 16px; }
+  .progress-bar-bg { background: #475569; border-radius: 8px; height: 10px; overflow: hidden; }
+  .progress-bar-fill { background: linear-gradient(90deg, #22c55e, #16a34a); height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+  .progress-text { font-size: 13px; color: #94a3b8; margin-top: 4px; display: flex; justify-content: space-between; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; position: sticky; top: 130px; z-index: 50; background: var(--bg); padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .toolbar button { padding: 6px 14px; font-size: 13px; border: 1px solid var(--border); background: var(--card); border-radius: 6px; cursor: pointer; color: var(--text); transition: all 0.15s; }
+  .toolbar button:hover { background: #f1f5f9; border-color: var(--accent); }
+  .toolbar button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+
+  .week { margin-bottom: 32px; }
+  .week-header { font-size: 18px; font-weight: 700; color: var(--text); padding: 12px 0 4px; border-bottom: 2px solid var(--accent); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .week-progress { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+  .day-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+  .day-header { padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .day-header:hover { background: #f1f5f9; }
+  .day-title { font-weight: 600; font-size: 15px; }
+  .day-time { font-size: 12px; color: var(--muted); }
+  .day-toggle { font-size: 18px; color: var(--muted); transition: transform 0.2s; }
+  .day-toggle.collapsed { transform: rotate(-90deg); }
+
+  .day-body { padding: 0; }
+  .day-body.hidden { display: none; }
+
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: #fafbfd; }
+  .check-item.done { background: #f0fdf4; }
+  .check-item.failed { background: #fef2f2; }
+  .check-item.blocked { background: #fffbeb; }
+
+  .check-item input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+  .check-content { flex: 1; min-width: 0; }
+  .check-label { font-size: 14px; cursor: pointer; }
+  .check-label.checked { text-decoration: line-through; color: var(--muted); }
+  .check-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .status-select { padding: 2px 6px; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; background: white; cursor: pointer; flex-shrink: 0; }
+  .status-select.pass { background: #dcfce7; color: #166534; border-color: #86efac; }
+  .status-select.fail { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
+  .status-select.blocked { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+  .status-select.in-progress { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+
+  .feedback-area { padding: 12px 16px; border-top: 1px solid var(--border); background: #fafbfd; }
+  .feedback-area label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+  .feedback-area textarea { width: 100%; min-height: 50px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; background: white; }
+  .feedback-area textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+
+  .known-issues { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+  .known-issues h3 { font-size: 15px; color: #92400e; margin-bottom: 8px; }
+  .known-issues table { width: 100%; font-size: 13px; border-collapse: collapse; }
+  .known-issues th { text-align: left; padding: 4px 8px; color: #92400e; font-weight: 600; border-bottom: 1px solid #fde68a; }
+  .known-issues td { padding: 4px 8px; color: #78350f; border-bottom: 1px solid #fef3c7; }
+
+  .quick-ref { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+  .quick-ref h3 { font-size: 15px; color: #1e40af; margin-bottom: 8px; }
+  .quick-ref table { width: 100%; font-size: 13px; border-collapse: collapse; }
+  .quick-ref th { text-align: left; padding: 4px 8px; color: #1e40af; font-weight: 600; border-bottom: 1px solid #bfdbfe; }
+  .quick-ref td { padding: 4px 8px; color: #1e3a5f; border-bottom: 1px solid #dbeafe; }
+  .quick-ref code { background: #dbeafe; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  .export-section { text-align: center; margin: 32px 0; }
+  .export-section button { padding: 10px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; margin: 0 6px; transition: all 0.15s; }
+  .btn-export { background: var(--accent); color: white; }
+  .btn-export:hover { background: #1d4ed8; }
+  .btn-reset { background: #fee2e2; color: var(--red); }
+  .btn-reset:hover { background: #fecaca; }
+  .btn-print { background: #f0fdf4; color: var(--green); }
+  .btn-print:hover { background: #dcfce7; }
+
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .summary-card .num { font-size: 24px; font-weight: 700; }
+  .summary-card .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .num.green { color: var(--green); }
+  .num.red { color: var(--red); }
+  .num.amber { color: var(--amber); }
+  .num.blue { color: var(--accent); }
+  .num.purple { color: var(--purple); }
+
+  @media print {
+    .header { position: static; }
+    .toolbar, .export-section, .btn-reset { display: none; }
+    .day-body.hidden { display: block !important; }
+    .day-toggle { display: none; }
+    body { padding: 0; }
+    .check-item { break-inside: avoid; }
+  }
+  @media (max-width: 600px) {
+    .header-row { flex-direction: column; }
+    .summary-cards { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div>
+      <h1>GrowthFin CRM — Staff Onboarding Checklist</h1>
+      <p>https://growthfin.signaldb.app &nbsp;|&nbsp; 3-week schedule &nbsp;|&nbsp; ~6.5 hours total</p>
+    </div>
+    <div class="header-meta">
+      <div>
+        <label>Your Name</label><br>
+        <input type="text" id="staffName" placeholder="Enter your name" oninput="saveState()">
+      </div>
+      <div>
+        <label>Start Date</label><br>
+        <input type="date" id="startDate" oninput="saveState()">
+      </div>
+    </div>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text"><span id="progressLabel">0 of 0 items checked</span><span id="progressPct">0%</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="summary-cards" id="summaryCards">
+    <div class="summary-card"><div class="num green" id="countPass">0</div><div class="lbl">Passed</div></div>
+    <div class="summary-card"><div class="num red" id="countFail">0</div><div class="lbl">Failed</div></div>
+    <div class="summary-card"><div class="num amber" id="countBlocked">0</div><div class="lbl">Blocked</div></div>
+    <div class="summary-card"><div class="num blue" id="countProgress">0</div><div class="lbl">In Progress</div></div>
+    <div class="summary-card"><div class="num purple" id="countPending">0</div><div class="lbl">Not Started</div></div>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <button class="active" onclick="filterItems('all')">All</button>
+    <button onclick="filterItems('pending')">Not Started</button>
+    <button onclick="filterItems('in-progress')">In Progress</button>
+    <button onclick="filterItems('pass')">Passed</button>
+    <button onclick="filterItems('fail')">Failed</button>
+    <button onclick="filterItems('blocked')">Blocked</button>
+  </div>
+
+  <!-- KNOWN ISSUES -->
+  <div class="known-issues">
+    <h3>&#9888; Known Limitations — Be Aware During Testing</h3>
+    <table>
+      <tr><th>Issue</th><th>Impact</th><th>Workaround</th></tr>
+      <tr><td>CIPC returns mock data</td><td>SA company registry lookups are fake</td><td>Use web search results; paid provider signup pending</td></tr>
+      <tr><td>SSE real-time updates 503</td><td>Tables don't auto-refresh</td><td>Manually refresh page after changes</td></tr>
+      <tr><td>Some pages missing from sidebar</td><td>Predictions, Research, Batches undiscoverable</td><td>Access via direct URL</td></tr>
+      <tr><td>Campaign scheduling not implemented</td><td>Cannot schedule future sends</td><td>Activate campaigns manually</td></tr>
+      <tr><td>Escape key triggers navigation</td><td>Closing dropdowns may redirect</td><td>Click elsewhere instead of Escape</td></tr>
+      <tr><td>Fit scores recently patched</td><td>Historical leads may show fit=0</td><td>Recalculate scores after enrichment</td></tr>
+    </table>
+  </div>
+
+  <!-- QUICK REFERENCE -->
+  <div class="quick-ref">
+    <h3>Quick Reference</h3>
+    <table>
+      <tr><th>Action</th><th>Where</th></tr>
+      <tr><td>Create a lead</td><td>Leads &gt; New Lead</td></tr>
+      <tr><td>Import leads (CSV)</td><td>Leads &gt; Import</td></tr>
+      <tr><td>Enrich leads</td><td>Enrichment &gt; New Job</td></tr>
+      <tr><td>Check scores</td><td>Lead Detail &gt; Score Card</td></tr>
+      <tr><td>Create campaign</td><td>Campaigns &gt; New <em>(enable Sandbox first!)</em></td></tr>
+      <tr><td>Export data</td><td>Any list &gt; Export button</td></tr>
+      <tr><td>Global search</td><td>Search (sidebar)</td></tr>
+      <tr><td>Enable sandbox</td><td><code>/crm/sandbox</code> &gt; toggle on</td></tr>
+    </table>
+  </div>
+
+  <!-- ========== WEEK 1 ========== -->
+  <div class="week" id="week1">
+    <div class="week-header">Week 1: Foundations <span class="week-progress" id="week1-progress"></span></div>
+
+    <!-- Day 1 -->
+    <div class="day-card" data-day="day1">
+      <div class="day-header" onclick="toggleDay('day1')">
+        <div><span class="day-title">Day 1 — Login &amp; Orientation</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day1">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day1">
+        <div class="check-item" data-id="1-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Sign in to GrowthFin</div>
+            <div class="check-detail">Go to https://growthfin.signaldb.app/auth/sign-in with your credentials</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="1-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Explore the Dashboard</div>
+            <div class="check-detail">Review stats cards, AI insight widgets (Top Intent Leads, At-Risk Leads), recent activities</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="1-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Navigate sidebar sections</div>
+            <div class="check-detail">Click through: Pipeline, Engage, Analyze, Resources, Settings — verify each loads</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="1-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create your first lead</div>
+            <div class="check-detail">Leads &gt; New Lead. Fill: name, email, phone, company, source, status. Submit and verify toast</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="1-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View your lead in the list and detail page</div>
+            <div class="check-detail">Find your lead in the table, click to open detail page, verify all fields saved correctly</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 1</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day1"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-card" data-day="day2">
+      <div class="day-header" onclick="toggleDay('day2')">
+        <div><span class="day-title">Day 2 — Leads Deep Dive</span> <span class="day-time">~45 min</span></div>
+        <span class="day-toggle" id="toggle-day2">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day2">
+        <div class="check-item" data-id="2-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Test lead list: sort, filter by status, search</div>
+            <div class="check-detail">Filter by New/Contacted/Qualified/Converted. Search by name, email, company</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="2-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Edit a lead — change fields, update status</div>
+            <div class="check-detail">Open a lead detail, edit fields, save. Verify changes persist on reload</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="2-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Test bulk operations (select multiple, assign, update)</div>
+            <div class="check-detail">Check multiple leads via checkboxes. Try bulk assign and bulk status update</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="2-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Import leads from CSV</div>
+            <div class="check-detail">Leads &gt; Import. Upload a test CSV (5-10 rows), map columns, preview, execute import</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="2-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Export leads to CSV</div>
+            <div class="check-detail">Click Export button, select CSV, download file, verify contents match</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="2-6">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Delete a lead (verify confirmation dialog, not browser alert)</div>
+            <div class="check-detail">Delete from detail or list page. Should show shadcn dialog, NOT browser confirm</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 2</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-card" data-day="day3">
+      <div class="day-header" onclick="toggleDay('day3')">
+        <div><span class="day-title">Day 3 — Contacts &amp; Accounts</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day3">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day3">
+        <div class="check-item" data-id="3-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View contacts list — verify table columns</div>
+            <div class="check-detail">Name, Email, Company, Phone, Status, Lifecycle stage</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="3-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create, edit, and delete a contact</div>
+            <div class="check-detail">Full CRUD cycle. Verify toast notifications and data persistence</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="3-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View accounts list — create an account</div>
+            <div class="check-detail">Company name, industry, billing address. Verify in list</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="3-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View account detail — associated contacts and opportunities</div>
+            <div class="check-detail">Open an account, verify linked contacts and opportunities display correctly</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="3-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Import contacts from CSV</div>
+            <div class="check-detail">Contacts &gt; Import. Upload CSV, map columns, execute</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 3</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-card" data-day="day4">
+      <div class="day-header" onclick="toggleDay('day4')">
+        <div><span class="day-title">Day 4 — Pipeline &amp; Opportunities</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day4">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day4">
+        <div class="check-item" data-id="4-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View Opportunities Kanban board</div>
+            <div class="check-detail">Verify stage columns render correctly</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="4-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create an opportunity</div>
+            <div class="check-detail">Name, value, stage, expected close date, link to account</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="4-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Drag opportunity between stages</div>
+            <div class="check-detail">Drag on Kanban board or edit stage field. Verify stage persists</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="4-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Convert a qualified lead to Contact + Opportunity</div>
+            <div class="check-detail">Lead detail &gt; Convert button. Complete wizard, verify entities created</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="4-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View Pipeline Forecast</div>
+            <div class="check-detail">Opportunities &gt; Forecast view — verify data renders</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 4</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day4"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5 -->
+    <div class="day-card" data-day="day5">
+      <div class="day-header" onclick="toggleDay('day5')">
+        <div><span class="day-title">Day 5 — Activities &amp; Calendar</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day5">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day5">
+        <div class="check-item" data-id="5-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Activities page — tabs: Tasks, Calls, Meetings</div>
+            <div class="check-detail">Verify each tab renders, filter by type and status</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="5-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create a task linked to a lead</div>
+            <div class="check-detail">Set due date, priority, description. Verify appears in list</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="5-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create a meeting with time and location</div>
+            <div class="check-detail">Link to a contact, set meeting time and location</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="5-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Calendar view — weekly + list toggle</div>
+            <div class="check-detail">Navigate to Calendar, switch between weekly and list view</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="5-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">My Queue — priority-sorted lead queue</div>
+            <div class="check-detail">View assigned leads, stats: assigned count, overdue callbacks</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 5</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day5"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== WEEK 2 ========== -->
+  <div class="week" id="week2">
+    <div class="week-header">Week 2: Communication &amp; Outreach <span class="week-progress" id="week2-progress"></span></div>
+
+    <!-- Day 6 -->
+    <div class="day-card" data-day="day6">
+      <div class="day-header" onclick="toggleDay('day6')">
+        <div><span class="day-title">Day 6 — Templates</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day6">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day6">
+        <div class="check-item" data-id="6-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Browse email templates</div>
+            <div class="check-detail">Navigate to Email Templates, review existing templates</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="6-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create an email template with variables</div>
+            <div class="check-detail">Subject + body using {"{{firstName}}"}, {"{{company}}"} placeholders</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="6-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create an SMS template — verify character count</div>
+            <div class="check-detail">Navigate to SMS Templates, create template, check segment counting</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="6-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Review AI Call Scripts</div>
+            <div class="check-detail">Navigate to AI Call Scripts, review format: objectives, talking points, objections</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 6</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day6"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 7 -->
+    <div class="day-card" data-day="day7">
+      <div class="day-header" onclick="toggleDay('day7')">
+        <div><span class="day-title">Day 7 — Campaigns</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day7">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day7">
+        <div class="check-item" data-id="7-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Enable Sandbox Mode FIRST</div>
+            <div class="check-detail">Navigate to Sandbox (/crm/sandbox), toggle ON so no real messages are sent</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="7-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Browse campaign list with filters</div>
+            <div class="check-detail">Filter by status, channel. Search by campaign name</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="7-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create an email campaign (3-step wizard)</div>
+            <div class="check-detail">Step 1: Basic Info &gt; Step 2: Audience &gt; Step 3: Message. Submit</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="7-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View campaign detail and test Activate/Pause</div>
+            <div class="check-detail">Stats: Sent, Opens, Clicks. Test action buttons. Recipients table</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="7-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Check Sandbox for intercepted messages</div>
+            <div class="check-detail">Navigate to Sandbox page, verify messages appear in Email/SMS tabs</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 7</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day7"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 8 -->
+    <div class="day-card" data-day="day8">
+      <div class="day-header" onclick="toggleDay('day8')">
+        <div><span class="day-title">Day 8 — Lists &amp; Segments</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day8">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day8">
+        <div class="check-item" data-id="8-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create a static lead list</div>
+            <div class="check-detail">Navigate to Lists, create new list, add leads as members</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="8-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create a dynamic segment with filters</div>
+            <div class="check-detail">Segments &gt; New. Use visual query builder (e.g., status = "Qualified")</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="8-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Preview segment — see live member count before saving</div>
+            <div class="check-detail">Click preview in segment builder, verify count matches expectations</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 8</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day8"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 9 -->
+    <div class="day-card" data-day="day9">
+      <div class="day-header" onclick="toggleDay('day9')">
+        <div><span class="day-title">Day 9 — Enrichment &amp; Scoring</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day9">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day9">
+        <div class="check-item" data-id="9-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Navigate to Enrichment page</div>
+            <div class="check-detail">Access via /crm/enrichment (may not be in sidebar yet). Verify job list</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="9-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create enrichment job — run sample mode (1-2 leads)</div>
+            <div class="check-detail">Select a list, run sample. Cost ~R0.15/lead. Verify results appear</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="9-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Review enrichment results on lead detail page</div>
+            <div class="check-detail">Open enriched lead, check: title, LinkedIn, company data in customFields</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="9-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Run full batch enrichment</div>
+            <div class="check-detail">Approve batch, watch progress. Verify all leads get results. Note: CIPC returns mock data</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="9-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Verify lead scores updated after enrichment</div>
+            <div class="check-detail">Check Lead Score Card. Composite should be &gt; 0 for enriched SA leads. Fit score should now be &gt; 0</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 9</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day9"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 10 -->
+    <div class="day-card" data-day="day10">
+      <div class="day-header" onclick="toggleDay('day10')">
+        <div><span class="day-title">Day 10 — Analytics &amp; Search</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day10">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day10">
+        <div class="check-item" data-id="10-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Analytics dashboard — date ranges and tabs</div>
+            <div class="check-detail">Select 7d/30d/90d. Switch tabs: Campaigns, Research, Activity Timeline</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="10-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Export data from analytics (CSV/XLSX/JSON)</div>
+            <div class="check-detail">Use Export Dialog, select format, download, verify contents</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="10-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Global search across all entity types</div>
+            <div class="check-detail">Search for leads, contacts, accounts by name. Test entity type filters</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 10</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day10"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== WEEK 3 ========== -->
+  <div class="week" id="week3">
+    <div class="week-header">Week 3: Advanced Features &amp; Admin <span class="week-progress" id="week3-progress"></span></div>
+
+    <!-- Day 11 -->
+    <div class="day-card" data-day="day11">
+      <div class="day-header" onclick="toggleDay('day11')">
+        <div><span class="day-title">Day 11 — AI Features</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day11">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day11">
+        <div class="check-item" data-id="11-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">AI Agent dashboard — today's call list</div>
+            <div class="check-detail">Navigate to Agent. Verify priority list renders, campaign filter works</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="11-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">AI Calls history — filter by outcome, sentiment</div>
+            <div class="check-detail">Navigate to AI Calls, review call grid and detail view</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="11-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Research sessions (via URL: /crm/research)</div>
+            <div class="check-detail">Not in sidebar. View session list, status badges. Start a session if possible</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="11-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Predictions (via URL: /crm/predictions)</div>
+            <div class="check-detail">Not in sidebar. View model list, active model card</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 11</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day11"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 12 -->
+    <div class="day-card" data-day="day12">
+      <div class="day-header" onclick="toggleDay('day12')">
+        <div><span class="day-title">Day 12 — Compliance (POPIA &amp; FICA)</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day12">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day12">
+        <div class="check-item" data-id="12-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Compliance dashboard — KPIs render</div>
+            <div class="check-detail">Consent rate, pending KYC, verified KYC</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="12-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">POPIA consent — create/view consent records</div>
+            <div class="check-detail">Create a consent record, verify status badge displays</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="12-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">FICA KYC — create record, verify/reject workflow</div>
+            <div class="check-detail">Create KYC record, test verify action, review risk rating badges</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 12</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day12"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 13 -->
+    <div class="day-card" data-day="day13">
+      <div class="day-header" onclick="toggleDay('day13')">
+        <div><span class="day-title">Day 13 — Automation &amp; Workflows</span> <span class="day-time">~20 min</span></div>
+        <span class="day-toggle" id="toggle-day13">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day13">
+        <div class="check-item" data-id="13-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">View workflow list</div>
+            <div class="check-detail">Automation &gt; Workflows. Verify list renders with activate/pause actions</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="13-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Create a workflow</div>
+            <div class="check-detail">Example: "When lead status = Qualified, create follow-up task"</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="13-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Activate and pause a workflow</div>
+            <div class="check-detail">Test toggle on/off. Verify status changes persist</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 13</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day13"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 14 -->
+    <div class="day-card" data-day="day14">
+      <div class="day-header" onclick="toggleDay('day14')">
+        <div><span class="day-title">Day 14 — Settings (Admin only)</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day14">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day14">
+        <div class="check-item" data-id="14-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">General settings — workspace name</div>
+            <div class="check-detail">Settings &gt; General tab. Edit workspace name (owner only)</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="14-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Team members — invite, roles, remove</div>
+            <div class="check-detail">Settings &gt; Members tab. Invite a team member, assign role</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="14-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Integrations — webhooks, API keys, event catalog</div>
+            <div class="check-detail">Settings &gt; Integrations. Browse 3 tabs, create a test webhook</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="14-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Email deliverability — suppression, rate limits</div>
+            <div class="check-detail">Settings &gt; Email Deliverability. Review suppression list and compliance settings</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="14-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">AI config + API usage</div>
+            <div class="check-detail">Settings &gt; AI + API Usage tabs. Review usage metrics and cost management</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 14</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day14"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 15 -->
+    <div class="day-card" data-day="day15">
+      <div class="day-header" onclick="toggleDay('day15')">
+        <div><span class="day-title">Day 15 — Data Ops &amp; Wrap-Up</span> <span class="day-time">~30 min</span></div>
+        <span class="day-toggle" id="toggle-day15">&#9660;</span>
+      </div>
+      <div class="day-body" id="body-day15">
+        <div class="check-item" data-id="15-1">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Full import workflow: CSV &gt; List &gt; Enrich &gt; Score</div>
+            <div class="check-detail">Import 5-10 leads via CSV, verify list auto-created, run enrichment, check scores</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="15-2">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Data Quality dashboard</div>
+            <div class="check-detail">Navigate to Data Quality, review completeness scores for your leads</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="15-3">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Webhook Test tool</div>
+            <div class="check-detail">Select channel, event type, campaign + recipient. Trigger test event</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="15-4">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Timeline — unified CRM event stream</div>
+            <div class="check-detail">Navigate to Timeline (/crm/timeline), verify events, test filters</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="check-item" data-id="15-5">
+          <input type="checkbox" onchange="onCheck(this)">
+          <div class="check-content">
+            <div class="check-label">Submit final feedback</div>
+            <div class="check-detail">Review all your feedback notes. Add overall impressions in the box below</div>
+          </div>
+          <select class="status-select" onchange="onStatus(this)"><option value="">—</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="blocked">Blocked</option><option value="in-progress">In Progress</option></select>
+        </div>
+        <div class="feedback-area">
+          <label>Feedback / Issues for Day 15</label>
+          <textarea placeholder="Describe any issues, bugs, confusion, or suggestions..." oninput="saveState()" data-feedback="day15"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERALL FEEDBACK -->
+  <div class="day-card" data-day="overall">
+    <div class="day-header" style="background:#eff6ff;">
+      <div><span class="day-title">Overall Feedback &amp; Impressions</span></div>
+    </div>
+    <div class="day-body" id="body-overall">
+      <div class="feedback-area">
+        <label>What worked well?</label>
+        <textarea placeholder="Features you liked, things that felt intuitive..." oninput="saveState()" data-feedback="overall-good" style="min-height:80px;"></textarea>
+      </div>
+      <div class="feedback-area">
+        <label>What needs improvement?</label>
+        <textarea placeholder="Confusing areas, missing features, broken things..." oninput="saveState()" data-feedback="overall-improve" style="min-height:80px;"></textarea>
+      </div>
+      <div class="feedback-area">
+        <label>Priority bugs to fix (rank by importance)</label>
+        <textarea placeholder="1. ...\n2. ...\n3. ..." oninput="saveState()" data-feedback="overall-bugs" style="min-height:80px;"></textarea>
+      </div>
+      <div class="feedback-area">
+        <label>Feature requests</label>
+        <textarea placeholder="Things you wish the CRM could do..." oninput="saveState()" data-feedback="overall-features" style="min-height:80px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="export-section">
+    <button class="btn-export" onclick="exportReport()">Export Feedback as JSON</button>
+    <button class="btn-print" onclick="window.print()">Print Checklist</button>
+    <button class="btn-reset" onclick="resetState()">Reset All Progress</button>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'growthfin-onboarding-v1';
+
+function saveState() {
+  const state = { checkboxes: {}, statuses: {}, feedbacks: {}, meta: {} };
+
+  // Checkboxes
+  for (const el of document.querySelectorAll('.check-item')) {
+    const id = el.dataset.id;
+    const cb = el.querySelector('input[type="checkbox"]');
+    const sel = el.querySelector('.status-select');
+    if (id) {
+      state.checkboxes[id] = cb.checked;
+      state.statuses[id] = sel.value;
+    }
+  }
+
+  // Feedbacks
+  for (const ta of document.querySelectorAll('textarea[data-feedback]')) {
+    state.feedbacks[ta.dataset.feedback] = ta.value;
+  }
+
+  // Meta
+  state.meta.staffName = document.getElementById('staffName').value;
+  state.meta.startDate = document.getElementById('startDate').value;
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateProgress();
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) { updateProgress(); return; }
+  const state = JSON.parse(raw);
+
+  // Checkboxes + statuses
+  for (const el of document.querySelectorAll('.check-item')) {
+    const id = el.dataset.id;
+    if (!id) continue;
+    const cb = el.querySelector('input[type="checkbox"]');
+    const sel = el.querySelector('.status-select');
+    if (state.checkboxes[id]) { cb.checked = true; }
+    if (state.statuses[id]) { sel.value = state.statuses[id]; }
+    applyItemStyle(el, cb.checked, sel.value);
+  }
+
+  // Feedbacks
+  for (const ta of document.querySelectorAll('textarea[data-feedback]')) {
+    if (state.feedbacks[ta.dataset.feedback]) ta.value = state.feedbacks[ta.dataset.feedback];
+  }
+
+  // Meta
+  if (state.meta?.staffName) document.getElementById('staffName').value = state.meta.staffName;
+  if (state.meta?.startDate) document.getElementById('startDate').value = state.meta.startDate;
+
+  updateProgress();
+}
+
+function onCheck(cb) {
+  const item = cb.closest('.check-item');
+  const sel = item.querySelector('.status-select');
+  if (cb.checked && !sel.value) sel.value = 'pass';
+  applyItemStyle(item, cb.checked, sel.value);
+  saveState();
+}
+
+function onStatus(sel) {
+  const item = sel.closest('.check-item');
+  const cb = item.querySelector('input[type="checkbox"]');
+  if (sel.value === 'pass' || sel.value === 'fail') cb.checked = true;
+  applyItemStyle(item, cb.checked, sel.value);
+  saveState();
+}
+
+function applyItemStyle(item, checked, status) {
+  const label = item.querySelector('.check-label');
+  const sel = item.querySelector('.status-select');
+
+  item.classList.remove('done', 'failed', 'blocked');
+  sel.classList.remove('pass', 'fail', 'blocked', 'in-progress');
+  label.classList.remove('checked');
+
+  if (status === 'pass') { item.classList.add('done'); sel.classList.add('pass'); }
+  else if (status === 'fail') { item.classList.add('failed'); sel.classList.add('fail'); }
+  else if (status === 'blocked') { item.classList.add('blocked'); sel.classList.add('blocked'); }
+  else if (status === 'in-progress') { sel.classList.add('in-progress'); }
+
+  if (checked) label.classList.add('checked');
+}
+
+function updateProgress() {
+  const items = document.querySelectorAll('.check-item');
+  let total = 0, checked = 0;
+  const counts = { pass: 0, fail: 0, blocked: 0, 'in-progress': 0, pending: 0 };
+
+  for (const item of items) {
+    if (!item.dataset.id) continue;
+    total++;
+    const cb = item.querySelector('input[type="checkbox"]');
+    const sel = item.querySelector('.status-select');
+    if (cb.checked) checked++;
+    const s = sel.value || 'pending';
+    if (s === '' || s === 'pending') counts.pending++;
+    else counts[s] = (counts[s] || 0) + 1;
+  }
+
+  // Pending = total minus all others
+  counts.pending = total - counts.pass - counts.fail - counts.blocked - counts['in-progress'];
+
+  const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = checked + ' of ' + total + ' items checked';
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  document.getElementById('countPass').textContent = counts.pass;
+  document.getElementById('countFail').textContent = counts.fail;
+  document.getElementById('countBlocked').textContent = counts.blocked;
+  document.getElementById('countProgress').textContent = counts['in-progress'];
+  document.getElementById('countPending').textContent = counts.pending;
+
+  // Week progress
+  for (const weekId of ['week1', 'week2', 'week3']) {
+    const weekItems = document.querySelectorAll('#' + weekId + ' .check-item');
+    let wTotal = 0, wChecked = 0;
+    for (const wi of weekItems) {
+      if (!wi.dataset.id) continue;
+      wTotal++;
+      if (wi.querySelector('input[type="checkbox"]').checked) wChecked++;
+    }
+    const wEl = document.getElementById(weekId + '-progress');
+    if (wEl) wEl.textContent = wChecked + '/' + wTotal + ' done';
+  }
+}
+
+function toggleDay(dayId) {
+  const body = document.getElementById('body-' + dayId);
+  const toggle = document.getElementById('toggle-' + dayId);
+  if (body.classList.contains('hidden')) {
+    body.classList.remove('hidden');
+    if (toggle) toggle.classList.remove('collapsed');
+  } else {
+    body.classList.add('hidden');
+    if (toggle) toggle.classList.add('collapsed');
+  }
+}
+
+function filterItems(filter) {
+  // Update toolbar buttons
+  for (const btn of document.querySelectorAll('.toolbar button')) {
+    btn.classList.remove('active');
+  }
+  event.target.classList.add('active');
+
+  for (const item of document.querySelectorAll('.check-item')) {
+    if (!item.dataset.id) continue;
+    const sel = item.querySelector('.status-select');
+    const status = sel.value || 'pending';
+
+    if (filter === 'all') { item.style.display = ''; }
+    else if (filter === 'pending' && (status === '' || status === 'pending')) { item.style.display = ''; }
+    else if (filter === status) { item.style.display = ''; }
+    else { item.style.display = 'none'; }
+  }
+}
+
+function exportReport() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const state = raw ? JSON.parse(raw) : {};
+  state.exportedAt = new Date().toISOString();
+
+  // Add item details
+  state.items = [];
+  for (const item of document.querySelectorAll('.check-item')) {
+    const id = item.dataset.id;
+    if (!id) continue;
+    const label = item.querySelector('.check-label').textContent;
+    const detail = item.querySelector('.check-detail')?.textContent || '';
+    const checked = item.querySelector('input[type="checkbox"]').checked;
+    const status = item.querySelector('.status-select').value || 'not-started';
+    state.items.push({ id, label, detail, checked, status });
+  }
+
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'growthfin-onboarding-' + (state.meta?.staffName || 'staff').replace(/\s+/g, '-').toLowerCase() + '-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetState() {
+  if (!confirm('Are you sure? This will reset ALL your progress and feedback.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// Init
+loadState();
+</script>
+
+</body>
+</html>

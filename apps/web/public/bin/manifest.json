@@ -1,0 +1,12 @@
+{
+  "version": "0.1.12",
+  "built_at": "2025-11-19T19:18:21.809Z",
+  "commit": "669b2a374f2f3bfb39ecc51ea0d37d23875db9e4",
+  "platforms": {
+    "darwin-arm64": {
+      "url": "/bin/agios-darwin-arm64",
+      "size": 61832368,
+      "built_at": "2025-11-19T19:18:21.993Z"
+    }
+  }
+}

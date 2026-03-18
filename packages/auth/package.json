@@ -1,0 +1,56 @@
+{
+  "name": "@signaldb-live/auth",
+  "version": "0.1.0",
+  "description": "SignalDB authentication client for web applications",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react.js",
+      "types": "./dist/react.d.ts"
+    },
+    "./widget": {
+      "import": "./dist/widget.js",
+      "types": "./dist/widget.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts src/react.tsx src/widget.tsx --outdir dist --target browser --external react --external react/jsx-runtime && bun run build:types",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
+    "dev": "bun build src/index.ts src/react.tsx src/widget.tsx --outdir dist --target browser --external react --external react/jsx-runtime --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "signaldb",
+    "auth",
+    "authentication",
+    "react"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/signaldb/signaldb.git",
+    "directory": "packages/auth"
+  }
+}

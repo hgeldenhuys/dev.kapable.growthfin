@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "sessions": {
+    "11c36d87-4df0-4c52-9a0c-98e936a31542": {
+      "name": "correct-quelea",
+      "created": "2025-12-02T06:05:22.127Z",
+      "source": "startup",
+      "manual": false
+    },
+    "3487d125-15d4-4618-b410-9f7b12808338": {
+      "name": "unconscious-leopon",
+      "created": "2025-12-07T20:59:33.841Z",
+      "source": "startup",
+      "manual": false
+    },
+    "827aec6e-5c0a-4f93-9285-5944ceda9654": {
+      "name": "enchanting-sailfish",
+      "created": "2025-12-08T15:19:30.078Z",
+      "source": "startup",
+      "manual": false
+    },
+    "0439068b-6256-4993-9e49-aa87f45ab133": {
+      "name": "missing-puffin",
+      "created": "2025-12-10T07:53:12.316Z",
+      "source": "startup",
+      "manual": false
+    },
+    "17e3369c-2412-4aa0-954e-91f6cf08bd75": {
+      "name": "broad-bobcat",
+      "created": "2026-01-09T17:32:51.720Z",
+      "source": "compact",
+      "manual": false
+    }
+  }
+}

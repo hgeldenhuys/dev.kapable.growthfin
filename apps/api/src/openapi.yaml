@@ -1,0 +1,1073 @@
+openapi: 3.1.0
+info:
+  title: SignalDB API
+  description: |
+    SignalDB is a real-time database API with multi-tenant isolation.
+
+    ## Authentication
+
+    All API endpoints require authentication via API keys:
+
+    - **Data API** (`sk_live_*`): Access project data (CRUD + realtime)
+    - **Admin API** (`sk_admin_*`): Manage projects, keys, and infrastructure
+
+    Pass the API key in the `Authorization` header:
+    ```
+    Authorization: Bearer sk_live_your_key_here
+    ```
+
+    ## Tiers
+
+    SignalDB supports three isolation tiers:
+
+    | Tier | Isolation | Description |
+    |------|-----------|-------------|
+    | Free | Schema | Shared PostgreSQL, separate schemas per project |
+    | Pro | Database | Dedicated database per project |
+    | Enterprise | Instance | Dedicated PostgreSQL container per customer |
+
+  version: 1.0.0
+  contact:
+    name: SignalDB Support
+    url: https://signaldb.live
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.signaldb.live
+    description: Production
+  - url: http://localhost:3003
+    description: Local Development
+
+tags:
+  - name: Data API
+    description: CRUD operations on project data (requires `sk_live_*` key)
+  - name: Realtime
+    description: Server-Sent Events and WebSocket streams
+  - name: Management API
+    description: Project and API key management (requires `sk_admin_*` key)
+  - name: Migrations
+    description: Tier upgrade/downgrade operations
+  - name: Instances
+    description: Database instance provisioning and management (requires `sk_admin_*` key with `manage:instances` scope)
+  - name: Health
+    description: Server health endpoints
+
+paths:
+  # =============================================================================
+  # DATA API
+  # =============================================================================
+  /v1/{table}:
+    get:
+      tags: [Data API]
+      summary: List rows
+      description: Retrieve paginated rows from a table
+      operationId: listRows
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Table name
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+          description: Number of rows to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Number of rows to skip
+        - name: orderBy
+          in: query
+          schema:
+            type: string
+            default: created_at
+          description: Field to order by
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort direction
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Data API]
+      summary: Create row
+      description: Insert a new row into a table (auto-creates table if needed)
+      operationId: createRow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Row data (any JSON object)
+              additionalProperties: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /v1/{table}/{id}:
+    get:
+      tags: [Data API]
+      summary: Get row
+      description: Retrieve a single row by ID
+      operationId: getRow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Data API]
+      summary: Update row
+      description: Replace row data
+      operationId: updateRow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Data API]
+      summary: Delete row
+      operationId: deleteRow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # =============================================================================
+  # REALTIME
+  # =============================================================================
+  /v1/{table}/stream:
+    get:
+      tags: [Realtime]
+      summary: SSE stream
+      description: |
+        Server-Sent Events stream for real-time updates.
+
+        Events:
+        - `connected`: Connection established
+        - `insert`: New row created
+        - `update`: Row updated
+        - `delete`: Row deleted
+
+        **Note:** Pass API key as query parameter for SSE connections.
+      operationId: streamTable
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: apiKey
+          in: query
+          required: true
+          schema:
+            type: string
+          description: API key (Bearer auth not supported for SSE)
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: connected
+                  data: {"message":"Connected to leads stream"}
+
+                  event: insert
+                  data: {"id":"abc-123","data":{"name":"John"},"ts":1705234567}
+
+  /v1/ws:
+    get:
+      tags: [Realtime]
+      summary: WebSocket connection
+      description: |
+        WebSocket endpoint for real-time subscriptions.
+
+        **Connect:** `wss://api.signaldb.live/v1/ws?apiKey=sk_live_...`
+
+        **Subscribe:**
+        ```json
+        {"action":"subscribe","table":"leads","id":"sub-1"}
+        ```
+
+        **Unsubscribe:**
+        ```json
+        {"action":"unsubscribe","id":"sub-1"}
+        ```
+      operationId: websocket
+      parameters:
+        - name: apiKey
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '101':
+          description: WebSocket upgrade
+
+  # =============================================================================
+  # MANAGEMENT API
+  # =============================================================================
+  /v1/projects:
+    get:
+      tags: [Management API]
+      summary: List projects
+      description: List all projects for the authenticated organization
+      operationId: listProjects
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+
+    post:
+      tags: [Management API]
+      summary: Create project
+      operationId: createProject
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug, environment]
+              properties:
+                name:
+                  type: string
+                  example: Production App
+                slug:
+                  type: string
+                  pattern: ^[a-z0-9-]+$
+                  example: production
+                environment:
+                  type: string
+                  enum: [development, staging, production]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /v1/projects/{projectId}:
+    get:
+      tags: [Management API]
+      summary: Get project
+      operationId: getProject
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+    delete:
+      tags: [Management API]
+      summary: Delete project
+      description: |
+        **WARNING:** This permanently deletes the project and all its data.
+      operationId: deleteProject
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /v1/projects/{projectId}/keys:
+    get:
+      tags: [Management API]
+      summary: List API keys
+      operationId: listApiKeys
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKey'
+
+    post:
+      tags: [Management API]
+      summary: Create API key
+      operationId: createApiKey
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Production Key
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                    enum: [read, write, realtime]
+                  default: [read, write, realtime]
+                expiresAt:
+                  type: string
+                  format: date-time
+                  description: Optional expiration date
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    description: |
+                      **IMPORTANT:** This is the only time the full key is shown.
+                      Store it securely.
+                    example: sk_live_abc123_full_key_value
+                  id:
+                    type: string
+                    format: uuid
+                  prefix:
+                    type: string
+                    example: sk_live_abc1
+
+  /v1/projects/{projectId}/keys/{keyId}:
+    delete:
+      tags: [Management API]
+      summary: Revoke API key
+      operationId: revokeApiKey
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Revoked
+
+  # =============================================================================
+  # MIGRATIONS
+  # =============================================================================
+  /v1/projects/{projectId}/upgrade:
+    post:
+      tags: [Migrations]
+      summary: Upgrade tier
+      description: |
+        Upgrade project to the next tier level.
+
+        **Upgrade paths:**
+        - **Free → Pro**: Schema isolation to database isolation
+        - **Pro → Enterprise**: Database isolation to dedicated instance
+
+        The upgrade automatically determines the next tier based on current tier.
+        For Pro → Enterprise, optionally include `{"targetTier": "enterprise"}` in body.
+
+        This operation:
+        1. Creates target database/instance
+        2. Copies all data
+        3. Sets up NOTIFY triggers for real-time
+        4. Updates the project registry
+      operationId: upgradeTier
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetTier:
+                  type: string
+                  enum: [pro, enterprise]
+                  description: Target tier (optional, auto-determined if not specified)
+      responses:
+        '200':
+          description: Migration completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationResult'
+        '400':
+          description: Already on highest tier or invalid upgrade path
+
+  /v1/projects/{projectId}/downgrade:
+    post:
+      tags: [Migrations]
+      summary: Downgrade tier
+      description: |
+        Downgrade project to a lower tier level.
+
+        **Downgrade paths:**
+        - **Enterprise → Pro**: Dedicated instance to shared Pro pool
+        - **Pro → Free**: Database isolation to schema isolation
+
+        The downgrade automatically determines the next tier based on current tier.
+
+        **Requirements for Pro → Free:**
+        - Database size must be under 100MB
+        - Row count must be under 10,000
+
+        If limits are exceeded, reduce data before downgrading.
+      operationId: downgradeTier
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetTier:
+                  type: string
+                  enum: [pro, free]
+                  description: Target tier (optional, auto-determined if not specified)
+      responses:
+        '200':
+          description: Migration completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationResult'
+        '400':
+          description: Already on lowest tier, size limits exceeded, or invalid downgrade path
+
+  /v1/migrations/{migrationId}:
+    get:
+      tags: [Migrations]
+      summary: Get migration status
+      operationId: getMigrationStatus
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: migrationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Migration'
+
+  # =============================================================================
+  # INSTANCE MANAGEMENT (Admin Only)
+  # =============================================================================
+  /v1/instances:
+    get:
+      tags: [Instances]
+      summary: List database instances
+      description: List all database instances (Pro pools and Enterprise dedicated instances)
+      operationId: listInstances
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: List of instances
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Instance'
+                  summary:
+                    type: object
+                    properties:
+                      free:
+                        type: integer
+                        description: Number of free tier instances
+                      pro:
+                        type: integer
+                        description: Number of pro tier instances
+                      enterprise:
+                        type: integer
+                        description: Number of enterprise tier instances
+                      total:
+                        type: integer
+                        description: Total number of instances
+                      available_enterprise:
+                        type: integer
+                        description: Enterprise instances available for assignment
+
+    post:
+      tags: [Instances]
+      summary: Provision new instance
+      description: |
+        Provision a new database instance (Pro pool or Enterprise dedicated).
+        This creates a Docker container with PostgreSQL and registers it in the control plane.
+      operationId: provisionInstance
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, tier]
+              properties:
+                name:
+                  type: string
+                  description: Instance name (used in container name)
+                  example: acme-corp
+                tier:
+                  type: string
+                  enum: [pro, enterprise]
+                  description: Instance tier
+                port:
+                  type: integer
+                  description: Port number (auto-assigned if not specified)
+                  example: 5450
+                maxDatabases:
+                  type: integer
+                  description: Maximum databases (defaults based on tier)
+                memoryGb:
+                  type: integer
+                  description: Memory limit in GB (defaults based on tier)
+                cpus:
+                  type: integer
+                  description: CPU limit (defaults based on tier)
+      responses:
+        '201':
+          description: Instance provisioned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  instance:
+                    $ref: '#/components/schemas/Instance'
+                  message:
+                    type: string
+        '400':
+          description: Invalid request
+        '409':
+          description: Name or port conflict
+        '500':
+          description: Provisioning failed
+
+  /v1/instances/{instanceId}:
+    get:
+      tags: [Instances]
+      summary: Get instance details
+      description: Get detailed information about a specific instance
+      operationId: getInstance
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Instance details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Instance'
+                  - type: object
+                    properties:
+                      projects:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            name:
+                              type: string
+                            slug:
+                              type: string
+                            database_name:
+                              type: string
+        '404':
+          description: Instance not found
+
+    delete:
+      tags: [Instances]
+      summary: Deprovision instance
+      description: |
+        Stop and remove an instance. Cannot deprovision instances with active projects.
+        The instance will be marked as 'deprovisioned' and the Docker container removed.
+      operationId: deprovisionInstance
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Instance deprovisioned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  instance:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                      tier:
+                        type: string
+        '400':
+          description: Instance has active projects
+        '404':
+          description: Instance not found
+        '500':
+          description: Deprovision failed
+
+  # =============================================================================
+  # HEALTH
+  # =============================================================================
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Data API key (`sk_live_*`)
+    AdminAuth:
+      type: http
+      scheme: bearer
+      description: Admin API key (`sk_admin_*`)
+
+  schemas:
+    Row:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: true
+
+    ListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        environment:
+          type: string
+          enum: [development, staging, production]
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+        created_at:
+          type: string
+          format: date-time
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        prefix:
+          type: string
+          description: First 12 characters of the key
+        scopes:
+          type: array
+          items:
+            type: string
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    Migration:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum: [upgrade_to_pro, upgrade_to_business, upgrade_to_enterprise, downgrade_to_hobbyist, downgrade_to_pro, downgrade_from_business, downgrade_from_enterprise]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        from_instance:
+          type: string
+        to_instance:
+          type: string
+        size_bytes:
+          type: integer
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    MigrationResult:
+      type: object
+      properties:
+        migrationId:
+          type: string
+          format: uuid
+        success:
+          type: boolean
+        error:
+          type: string
+        duration:
+          type: integer
+          description: Duration in milliseconds
+
+    Instance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Instance display name
+        container_name:
+          type: string
+          description: Docker container name
+        port:
+          type: integer
+          description: PostgreSQL port
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+        max_databases:
+          type: integer
+          description: Maximum databases this instance can host
+        current_databases:
+          type: integer
+          description: Current number of databases
+        max_size_gb:
+          type: number
+          description: Maximum size in GB
+        current_size_gb:
+          type: number
+          description: Current size in GB
+        status:
+          type: string
+          enum: [active, inactive, deprovisioned]
+        health_status:
+          type: string
+          enum: [healthy, unhealthy, unknown]
+        health_check_at:
+          type: string
+          format: date-time
+          nullable: true
+        server_name:
+          type: string
+          description: Server name
+        server_host:
+          type: string
+          description: Server hostname/IP
+        region:
+          type: string
+          description: Server region
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

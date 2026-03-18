@@ -1,0 +1,152 @@
+/**
+ * AI Assistant API Client
+ * Functions for managing AI chat conversations
+ */
+
+const API_BASE = typeof window !== 'undefined'
+  ? (window as any).ENV?.API_URL || 'http://localhost:3000'
+  : 'http://localhost:3000';
+
+export interface AIMessage {
+  id: string;
+  conversationId: string;
+  userId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  context: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AIConversation {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: AIMessage[];
+}
+
+export interface SendMessageRequest {
+  message: string;
+  context?: any;
+}
+
+export interface SendMessageResponse {
+  success: boolean;
+  conversation: AIConversation;
+  message: AIMessage;
+  response: AIMessage;
+}
+
+/**
+ * Fetch conversation with messages for a workspace and user
+ */
+export async function fetchConversation(
+  workspaceId: string,
+  userId: string
+): Promise<AIConversation> {
+  const url = `${API_BASE}/api/v1/ai-assistant/workspaces/${workspaceId}/chat/conversation?userId=${encodeURIComponent(userId)}`;
+  const res = await fetch(url, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to fetch conversation: ${error}`);
+  }
+
+  const data = await res.json();
+  return data.conversation;
+}
+
+/**
+ * Send a message to the AI Assistant
+ */
+export async function sendAIMessage(
+  workspaceId: string,
+  userId: string,
+  request: SendMessageRequest
+): Promise<SendMessageResponse> {
+  const url = `${API_BASE}/api/v1/ai-assistant/workspaces/${workspaceId}/chat/message`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      userId,
+      message: request.message,
+      context: request.context,
+    }),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to send message: ${error}`);
+  }
+
+  return res.json();
+}
+
+/**
+ * Clear conversation for a workspace and user
+ */
+export async function clearAIConversation(
+  workspaceId: string,
+  userId: string
+): Promise<{ success: boolean }> {
+  const url = `${API_BASE}/api/v1/ai-assistant/workspaces/${workspaceId}/chat/clear`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to clear conversation: ${error}`);
+  }
+
+  return res.json();
+}
+
+/**
+ * Get AI config for a workspace
+ */
+export async function fetchAIConfig(workspaceId: string): Promise<any> {
+  const url = `${API_BASE}/api/v1/ai-assistant/workspaces/${workspaceId}/config`;
+  const res = await fetch(url, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to fetch AI config: ${error}`);
+  }
+
+  return res.json();
+}
+
+/**
+ * Update AI config for a workspace
+ */
+export async function updateAIConfig(
+  workspaceId: string,
+  config: any
+): Promise<any> {
+  const url = `${API_BASE}/api/v1/ai-assistant/workspaces/${workspaceId}/config`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(config),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to update AI config: ${error}`);
+  }
+
+  return res.json();
+}

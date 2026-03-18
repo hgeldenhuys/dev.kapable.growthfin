@@ -1,0 +1,22 @@
+# SignalDB Caddyfile
+# Handles routing for all signaldb.live subdomains
+
+# Root domain - redirect to app
+signaldb.live {
+    redir https://app.signaldb.live{uri} permanent
+}
+
+# Admin dashboard
+app.signaldb.live {
+    reverse_proxy localhost:3000
+}
+
+# API endpoint
+api.signaldb.live {
+    reverse_proxy localhost:3000
+}
+
+# Wildcard for tenant subdomains
+*.signaldb.live {
+    reverse_proxy localhost:3000
+}

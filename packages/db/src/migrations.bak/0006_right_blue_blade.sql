@@ -1,0 +1,1 @@
+ALTER TABLE "event_summaries" ALTER COLUMN "transaction_id" DROP NOT NULL;

@@ -1,0 +1,21 @@
+{
+  "name": "@kapable/migrate",
+  "version": "0.1.0",
+  "description": "Schema-aware DDL migration runner for Kapable apps",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@kapable/db": "workspace:*"
+  },
+  "peerDependencies": {
+    "postgres": "^3.4.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,458 @@
+/**
+ * Enrichment Schema
+ * Tables for managing AI-powered contact enrichment jobs and results
+ */
+
+import {
+  pgTable,
+  uuid,
+  text,
+  boolean,
+  integer,
+  numeric,
+  timestamp,
+  jsonb,
+  index,
+  pgEnum,
+} from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { workspaces } from './workspaces';
+import { users } from './users';
+import { crmContactLists } from './contact-lists';
+import { crmContacts } from './crm';
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+export const enrichmentJobTypeEnum = pgEnum('crm_enrichment_job_type', [
+  'scoring', // Score contacts based on AI analysis
+  'classification', // Classify contacts into categories
+  'enhancement', // Enhance contact data with additional fields
+  'qualification', // Qualify leads based on criteria
+]);
+
+export const enrichmentStageTypeEnum = pgEnum('crm_enrichment_stage_type', [
+  'validate', // Validate contact data (email, phone, etc.)
+  'research', // Research company/person info
+  'score', // Score/rank contacts
+  'classify', // Classify into categories
+  'enrich', // Enrich with additional data
+]);
+
+export const enrichmentJobModeEnum = pgEnum('crm_enrichment_job_mode', [
+  'sample', // Test mode - process N contacts
+  'batch', // Production mode - process all contacts
+]);
+
+export const enrichmentJobStatusEnum = pgEnum('crm_enrichment_job_status', [
+  'draft', // Job created but not started
+  'sampling', // Running sample mode
+  'review', // Sample completed, awaiting approval
+  'running', // Running batch mode
+  'completed', // Successfully completed
+  'cancelled', // Cancelled by user
+  'failed', // Failed due to error
+  'budget_exceeded', // Budget limit exceeded
+]);
+
+export const enrichmentResultStatusEnum = pgEnum('crm_enrichment_result_status', [
+  'success', // Successfully enriched
+  'failed', // Failed to enrich
+  'skipped', // Skipped due to budget or other constraints
+]);
+
+// ============================================================================
+// ENRICHMENT JOBS TABLE
+// ============================================================================
+
+export const crmEnrichmentJobs = pgTable(
+  'crm_enrichment_jobs',
+  {
+    // Primary key
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Workspace isolation
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+
+    // Basic information
+    name: text('name').notNull(),
+    description: text('description'),
+    type: enrichmentJobTypeEnum('type').notNull().default('scoring'),
+    mode: enrichmentJobModeEnum('mode').notNull().default('sample'),
+
+    // Sample configuration
+    sampleSize: integer('sample_size').notNull().default(1), // Number of contacts to process in sample mode
+
+    // Source
+    sourceListId: uuid('source_list_id')
+      .notNull()
+      .references(() => crmContactLists.id, { onDelete: 'cascade' }),
+
+    // Pipeline (optional - if null, single-stage job)
+    pipelineId: uuid('pipeline_id').references(() => crmEnrichmentPipelines.id, {
+      onDelete: 'set null',
+    }),
+    currentStageId: uuid('current_stage_id').references(() => crmPipelineStages.id, {
+      onDelete: 'set null',
+    }),
+    currentStageOrder: integer('current_stage_order').default(0), // Which stage we're on (0-based)
+
+    // AI Configuration
+    model: text('model').notNull().default('openai/gpt-4o-mini'), // OpenRouter model ID
+    prompt: text('prompt').notNull(), // System prompt for enrichment
+    temperature: numeric('temperature', { precision: 3, scale: 2 }).default('0.7'),
+    maxTokens: integer('max_tokens').default(500),
+
+    // Status
+    status: enrichmentJobStatusEnum('status').notNull().default('draft'),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+
+    // Progress tracking
+    totalContacts: integer('total_contacts').notNull().default(0), // Total contacts to process
+    processedContacts: integer('processed_contacts').notNull().default(0), // Successfully processed
+    failedContacts: integer('failed_contacts').notNull().default(0), // Failed to process
+    skippedContacts: integer('skipped_contacts').notNull().default(0), // Skipped (budget, etc.)
+
+    // Cost tracking
+    estimatedCost: numeric('estimated_cost', { precision: 15, scale: 4 }), // Estimated cost in USD
+    actualCost: numeric('actual_cost', { precision: 15, scale: 4 }).notNull().default('0'), // Actual cost in USD
+    budgetLimit: numeric('budget_limit', { precision: 15, scale: 4 }), // Maximum budget in USD
+
+    // Error tracking
+    lastError: text('last_error'), // Last error message
+    errorCount: integer('error_count').notNull().default(0),
+
+    // Ownership
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+
+    // Extensibility
+    tags: text('tags').array().notNull().default([]),
+    metadata: jsonb('metadata').notNull().default({}),
+
+    // Soft delete (Agios standard)
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    canBeRevived: boolean('can_be_revived').notNull().default(true),
+    revivalCount: integer('revival_count').notNull().default(0),
+
+    // Audit trail (Agios standard)
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (table) => ({
+    // REQUIRED: Index on workspace_id for multi-tenancy
+    workspaceIdIdx: index('idx_crm_enrichment_jobs_workspace_id').on(table.workspaceId),
+
+    // Performance indexes
+    sourceListIdIdx: index('idx_crm_enrichment_jobs_source_list_id').on(table.sourceListId),
+    statusIdx: index('idx_crm_enrichment_jobs_status').on(table.status),
+    ownerIdIdx: index('idx_crm_enrichment_jobs_owner_id').on(table.ownerId),
+    createdAtIdx: index('idx_crm_enrichment_jobs_created_at').on(table.createdAt),
+  })
+);
+
+// ============================================================================
+// ENRICHMENT RESULTS TABLE
+// ============================================================================
+
+export const crmEnrichmentResults = pgTable(
+  'crm_enrichment_results',
+  {
+    // Primary key
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Workspace isolation
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+
+    // Relationships
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => crmEnrichmentJobs.id, { onDelete: 'cascade' }),
+    contactId: uuid('contact_id')
+      .notNull()
+      .references(() => crmContacts.id, { onDelete: 'cascade' }),
+
+    // Result data
+    status: enrichmentResultStatusEnum('status').notNull().default('success'),
+    score: numeric('score', { precision: 5, scale: 2 }), // 0-100 (for scoring jobs)
+    enrichmentData: jsonb('enrichment_data').notNull().default({}), // Full AI response
+    reasoning: text('reasoning'), // AI reasoning/explanation
+
+    // Error tracking
+    errorMessage: text('error_message'),
+
+    // Performance metrics
+    tokensUsed: integer('tokens_used'), // Total tokens consumed
+    cost: numeric('cost', { precision: 15, scale: 6 }), // Cost in USD
+    durationMs: integer('duration_ms'), // Processing time in milliseconds
+
+    // Timestamps
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    // REQUIRED: Index on workspace_id for multi-tenancy
+    workspaceIdIdx: index('idx_crm_enrichment_results_workspace_id').on(table.workspaceId),
+
+    // Performance indexes
+    jobIdIdx: index('idx_crm_enrichment_results_job_id').on(table.jobId),
+    contactIdIdx: index('idx_crm_enrichment_results_contact_id').on(table.contactId),
+    statusIdx: index('idx_crm_enrichment_results_status').on(table.status),
+    scoreIdx: index('idx_crm_enrichment_results_score').on(table.score),
+  })
+);
+
+// ============================================================================
+// TOOL CALLS TABLE
+// ============================================================================
+
+export const crmToolCalls = pgTable(
+  'crm_tool_calls',
+  {
+    // Primary key
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Workspace isolation
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+
+    // Relationships
+    enrichmentResultId: uuid('enrichment_result_id')
+      .notNull()
+      .references(() => crmEnrichmentResults.id, { onDelete: 'cascade' }),
+
+    // Tool information
+    toolName: text('tool_name').notNull(), // e.g., 'web_search'
+    arguments: jsonb('arguments').notNull().default({}), // Tool input
+    result: jsonb('result').notNull().default({}), // Tool output
+
+    // Performance metrics
+    cost: numeric('cost', { precision: 15, scale: 6 }), // Cost in USD
+    durationMs: integer('duration_ms'), // Processing time in milliseconds
+
+    // Status
+    status: text('status').notNull().default('success'), // success, failed
+    error: text('error'), // Error message if failed
+
+    // Timestamps
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    // REQUIRED: Index on workspace_id for multi-tenancy
+    workspaceIdIdx: index('idx_crm_tool_calls_workspace_id').on(table.workspaceId),
+
+    // Performance indexes
+    enrichmentResultIdIdx: index('idx_crm_tool_calls_enrichment_result_id').on(table.enrichmentResultId),
+    toolNameIdx: index('idx_crm_tool_calls_tool_name').on(table.toolName),
+    statusIdx: index('idx_crm_tool_calls_status').on(table.status),
+  })
+);
+
+// ============================================================================
+// RELATIONS
+// ============================================================================
+
+export const crmEnrichmentJobsRelations = relations(crmEnrichmentJobs, ({ one, many }) => ({
+  workspace: one(workspaces, {
+    fields: [crmEnrichmentJobs.workspaceId],
+    references: [workspaces.id],
+  }),
+  sourceList: one(crmContactLists, {
+    fields: [crmEnrichmentJobs.sourceListId],
+    references: [crmContactLists.id],
+  }),
+  owner: one(users, {
+    fields: [crmEnrichmentJobs.ownerId],
+    references: [users.id],
+  }),
+  pipeline: one(crmEnrichmentPipelines, {
+    fields: [crmEnrichmentJobs.pipelineId],
+    references: [crmEnrichmentPipelines.id],
+  }),
+  currentStage: one(crmPipelineStages, {
+    fields: [crmEnrichmentJobs.currentStageId],
+    references: [crmPipelineStages.id],
+  }),
+  results: many(crmEnrichmentResults),
+}));
+
+export const crmEnrichmentResultsRelations = relations(crmEnrichmentResults, ({ one, many }) => ({
+  workspace: one(workspaces, {
+    fields: [crmEnrichmentResults.workspaceId],
+    references: [workspaces.id],
+  }),
+  job: one(crmEnrichmentJobs, {
+    fields: [crmEnrichmentResults.jobId],
+    references: [crmEnrichmentJobs.id],
+  }),
+  contact: one(crmContacts, {
+    fields: [crmEnrichmentResults.contactId],
+    references: [crmContacts.id],
+  }),
+  toolCalls: many(crmToolCalls),
+}));
+
+export const crmToolCallsRelations = relations(crmToolCalls, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [crmToolCalls.workspaceId],
+    references: [workspaces.id],
+  }),
+  enrichmentResult: one(crmEnrichmentResults, {
+    fields: [crmToolCalls.enrichmentResultId],
+    references: [crmEnrichmentResults.id],
+  }),
+}));
+
+export const crmEnrichmentPipelinesRelations = relations(crmEnrichmentPipelines, ({ one, many }) => ({
+  workspace: one(workspaces, {
+    fields: [crmEnrichmentPipelines.workspaceId],
+    references: [workspaces.id],
+  }),
+  owner: one(users, {
+    fields: [crmEnrichmentPipelines.ownerId],
+    references: [users.id],
+  }),
+  stages: many(crmPipelineStages),
+  jobs: many(crmEnrichmentJobs),
+}));
+
+export const crmPipelineStagesRelations = relations(crmPipelineStages, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [crmPipelineStages.workspaceId],
+    references: [workspaces.id],
+  }),
+  pipeline: one(crmEnrichmentPipelines, {
+    fields: [crmPipelineStages.pipelineId],
+    references: [crmEnrichmentPipelines.id],
+  }),
+}));
+
+// ============================================================================
+// ENRICHMENT PIPELINES TABLE
+// ============================================================================
+
+export const crmEnrichmentPipelines = pgTable(
+  'crm_enrichment_pipelines',
+  {
+    // Primary key
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Workspace isolation
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+
+    // Basic information
+    name: text('name').notNull(),
+    description: text('description'),
+
+    // Configuration
+    isTemplate: boolean('is_template').notNull().default(false), // If true, can be reused across workspaces
+
+    // Ownership
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+
+    // Extensibility
+    tags: text('tags').array().notNull().default([]),
+    metadata: jsonb('metadata').notNull().default({}),
+
+    // Soft delete (Agios standard)
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    canBeRevived: boolean('can_be_revived').notNull().default(true),
+    revivalCount: integer('revival_count').notNull().default(0),
+
+    // Audit trail (Agios standard)
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (table) => ({
+    workspaceIdIdx: index('idx_crm_enrichment_pipelines_workspace_id').on(table.workspaceId),
+    ownerIdIdx: index('idx_crm_enrichment_pipelines_owner_id').on(table.ownerId),
+    isTemplateIdx: index('idx_crm_enrichment_pipelines_is_template').on(table.isTemplate),
+  })
+);
+
+// ============================================================================
+// PIPELINE STAGES TABLE
+// ============================================================================
+
+export const crmPipelineStages = pgTable(
+  'crm_pipeline_stages',
+  {
+    // Primary key
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Workspace isolation
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+
+    // Relationships
+    pipelineId: uuid('pipeline_id')
+      .notNull()
+      .references(() => crmEnrichmentPipelines.id, { onDelete: 'cascade' }),
+
+    // Basic information
+    name: text('name').notNull(),
+    description: text('description'),
+    stageType: enrichmentStageTypeEnum('stage_type').notNull(),
+    order: integer('order').notNull(), // Execution order (0-based)
+
+    // AI Configuration for this stage
+    model: text('model').notNull().default('openai/gpt-4o-mini'),
+    prompt: text('prompt').notNull(),
+    temperature: numeric('temperature', { precision: 3, scale: 2 }).default('0.7'),
+    maxTokens: integer('max_tokens').default(500),
+
+    // Stage control
+    skipOnError: boolean('skip_on_error').notNull().default(false), // Continue to next stage if this one fails
+    requiredScore: numeric('required_score', { precision: 5, scale: 2 }), // Minimum score to proceed (if previous stage was scoring)
+
+    // Extensibility
+    metadata: jsonb('metadata').notNull().default({}),
+
+    // Timestamps
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    workspaceIdIdx: index('idx_crm_pipeline_stages_workspace_id').on(table.workspaceId),
+    pipelineIdIdx: index('idx_crm_pipeline_stages_pipeline_id').on(table.pipelineId),
+    orderIdx: index('idx_crm_pipeline_stages_order').on(table.pipelineId, table.order),
+  })
+);
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export type CrmEnrichmentJob = typeof crmEnrichmentJobs.$inferSelect;
+export type NewCrmEnrichmentJob = typeof crmEnrichmentJobs.$inferInsert;
+
+export type CrmEnrichmentResult = typeof crmEnrichmentResults.$inferSelect;
+export type NewCrmEnrichmentResult = typeof crmEnrichmentResults.$inferInsert;
+
+export type EnrichmentJobType = (typeof enrichmentJobTypeEnum.enumValues)[number];
+export type EnrichmentJobMode = (typeof enrichmentJobModeEnum.enumValues)[number];
+export type EnrichmentJobStatus = (typeof enrichmentJobStatusEnum.enumValues)[number];
+export type EnrichmentResultStatus = (typeof enrichmentResultStatusEnum.enumValues)[number];
+
+export type CrmToolCall = typeof crmToolCalls.$inferSelect;
+export type NewCrmToolCall = typeof crmToolCalls.$inferInsert;
+
+export type CrmEnrichmentPipeline = typeof crmEnrichmentPipelines.$inferSelect;
+export type NewCrmEnrichmentPipeline = typeof crmEnrichmentPipelines.$inferInsert;
+
+export type CrmPipelineStage = typeof crmPipelineStages.$inferSelect;
+export type NewCrmPipelineStage = typeof crmPipelineStages.$inferInsert;
+
+export type EnrichmentStageType = (typeof enrichmentStageTypeEnum.enumValues)[number];

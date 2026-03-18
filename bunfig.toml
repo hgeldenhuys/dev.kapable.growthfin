@@ -1,0 +1,27 @@
+# Bun configuration
+# https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Auto-install peer dependencies
+auto = "auto"
+
+# Link workspace packages
+linkWorkspacePackages = true
+
+# Use exact versions for lockfile
+exact = true
+
+# Cache directory
+cache = "node_modules/.cache"
+
+[test]
+# Use Bun's built-in test runner
+# Preload happy-dom for component tests
+preload = ["./test/happydom.ts"]
+
+[run]
+# Automatically install dependencies
+autoInstall = true
+
+# Hot reload for development
+hot = true

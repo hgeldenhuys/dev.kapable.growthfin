@@ -1,0 +1,123 @@
+# Shepherd working files (agent communication — builder/reviewer outputs)
+.shepherd/builder/
+.shepherd/reviewer/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.react-router/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env
+!.env.production.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# Hook events log
+.agent/hook-events.log
+
+# Telegram configuration (contains sensitive tokens)
+.agent/telegram.json
+
+# Claude Code workspace (AI-generated files, reports, temp scripts)
+.claude/work/
+
+# Database
+*.db
+*.db-*
+drizzle/
+
+# Temp files
+tmp/
+temp/
+*.tmp
+
+# Bun
+.bun/
+bun.lockb
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Electric
+.electric/
+
+# OS
+Thumbs.db
+/.agent/error-queue/
+
+# Test temporary files
+test/temp/*
+!test/temp/.gitkeep
+
+# Test results (keep structure, ignore content)
+test/results/*
+!test/results/.gitkeep
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+
+apps/cli/.agent/
+/apps/api/data/audio/*
+/apps/api/public/cdn/audio/*
+/.claude/sdlc/kanban/sessions/archived/*
+
+# CLI binaries (too large for git, served via HTTP)
+apps/web/public/bin/agios*
+!apps/web/public/bin/manifest.json
+
+# Production deployment artifacts
+backups/
+*.sql.gz
+deployment/ssl/
+# Weave activity log
+.agent/weave.log
+
+# Claude Code hooks SDK and local settings
+.claude/claude-code-sdk/
+.claude/bin/
+.claude/settings.local.json
+
+# Archived sprint/implementation docs (moved from root)
+docs/archive/
+
+# Stale agent infrastructure
+.agent/
+.forge/
+.claude-hooks/
+.claude-plugin/

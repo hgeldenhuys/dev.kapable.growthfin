@@ -1,0 +1,181 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1760512324926,
+      "tag": "0000_military_tempest",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1760513000512,
+      "tag": "0001_wet_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760514870975,
+      "tag": "0002_naive_marvel_zombies",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760542198192,
+      "tag": "0003_tearful_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760561239445,
+      "tag": "0004_amazing_mentallo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760565911542,
+      "tag": "0005_windy_skreet",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1760599523643,
+      "tag": "0006_right_blue_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1730324000000,
+      "tag": "0028_add_models_and_dictionaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1762650160579,
+      "tag": "0029_add_llm_model_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1762659532065,
+      "tag": "0030_add_conversations",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1762751226919,
+      "tag": "0031_add_contact_lists",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1762784235307,
+      "tag": "0032_lead_management_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1765235891672,
+      "tag": "0033_majestic_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1765273107672,
+      "tag": "0034_left_ser_duncan",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1765274783750,
+      "tag": "0035_simple_lorna_dane",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1768970385232,
+      "tag": "0036_dry_glorian",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1769052557410,
+      "tag": "0037_glorious_sir_ram",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1769150424024,
+      "tag": "0038_lyrical_hellion",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1769399597525,
+      "tag": "0039_curvy_solo",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1769400971051,
+      "tag": "0040_lucky_living_mummy",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1769401378621,
+      "tag": "0041_bizarre_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1769401776375,
+      "tag": "0042_polite_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1769402262946,
+      "tag": "0043_married_forgotten_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1769805706803,
+      "tag": "0044_silly_warbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1769931408298,
+      "tag": "0045_fast_molten_man",
+      "breakpoints": true
+    }
+  ]
+}

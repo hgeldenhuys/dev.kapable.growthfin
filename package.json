@@ -1,0 +1,48 @@
+{
+  "name": "@growthfin/root",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GrowthFin CRM - migrating from SignalDB to Kapable",
+  "workspaces": [
+    "packages/*",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "bun run --filter './apps/*' dev",
+    "build": "bun run --filter './packages/*' build && bun run --filter './apps/*' build",
+    "test": "bun test",
+    "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter './apps/*' typecheck",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules packages/*/dist apps/*/dist",
+    "db:studio": "cd packages/db && bun run db:studio",
+    "db:push": "cd packages/db && bun run db:push",
+    "db:generate": "cd packages/db && bun run db:generate",
+    "uat:seed": "bun run apps/api/src/scripts/seed-uat-data.ts",
+    "uat:reset": "bun run apps/api/src/scripts/seed-uat-data.ts --reset"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "20.1.0",
+    "@playwright/test": "1.56.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/bun": "latest",
+    "drizzle-kit": "0.31.5",
+    "happy-dom": "20.6.1",
+    "playwright": "1.56.1",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "8.1.0",
+    "@radix-ui/react-scroll-area": "1.2.10",
+    "claude-hooks-sdk": "0.8.6"
+  },
+  "overrides": {
+    "refractor": "3.6.0",
+    "lowlight": "1.20.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

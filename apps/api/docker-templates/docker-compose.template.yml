@@ -1,0 +1,55 @@
+# SignalDB Apps Platform - Docker Compose Template
+# This template is used to generate docker-compose files for user apps
+#
+# Variables (replaced at generation time):
+#   - {{APP_NAME}}: App name (slug)
+#   - {{ORG_SLUG}}: Organization slug
+#   - {{ENV_NAME}}: Environment name (development, staging, production)
+#   - {{CONTAINER_NAME}}: Full container name (signaldb-app-{org}-{app}-{env})
+#   - {{PORT}}: Assigned port number
+#   - {{GIT_COMMIT}}: Git commit SHA
+#   - {{DATABASE_URL}}: SignalDB project database URL
+#   - {{SIGNALDB_API_KEY}}: API key for the linked project
+
+version: '3.8'
+
+services:
+  app:
+    container_name: {{CONTAINER_NAME}}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: {{APP_NAME}}
+        GIT_COMMIT: {{GIT_COMMIT}}
+    ports:
+      - "{{PORT}}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL={{DATABASE_URL}}
+      - SIGNALDB_API_URL=https://api.signaldb.live
+      - SIGNALDB_API_KEY={{SIGNALDB_API_KEY}}
+    restart: unless-stopped
+    labels:
+      - "signaldb.app={{APP_NAME}}"
+      - "signaldb.org={{ORG_SLUG}}"
+      - "signaldb.env={{ENV_NAME}}"
+      - "signaldb.port={{PORT}}"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - signaldb-apps
+
+networks:
+  signaldb-apps:
+    external: true

@@ -1,0 +1,204 @@
+/**
+ * Documentation Styles
+ * Custom styles for documentation pages
+ */
+
+/* Documentation content container */
+.docs-content {
+  max-width: 65ch;
+  line-height: 1.7;
+}
+
+/* Navigation sidebar */
+.docs-nav {
+  position: sticky;
+  top: 2rem;
+}
+
+/* Code blocks in documentation */
+.docs-content pre {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: hsl(var(--muted));
+  margin: 1.5rem 0;
+}
+
+.docs-content code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+/* Inline code */
+.docs-content :not(pre) > code {
+  background: hsl(var(--muted));
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+}
+
+/* Headings with scroll margin for anchor links */
+.docs-content h1,
+.docs-content h2,
+.docs-content h3,
+.docs-content h4,
+.docs-content h5,
+.docs-content h6 {
+  scroll-margin-top: 5rem;
+}
+
+/* Links in documentation */
+.docs-content a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.docs-content a:hover {
+  color: hsl(var(--primary) / 0.8);
+}
+
+/* Lists in documentation */
+.docs-content ul,
+.docs-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.docs-content li {
+  margin: 0.5rem 0;
+}
+
+/* Tables in documentation */
+.docs-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.docs-content th {
+  background: hsl(var(--muted));
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid hsl(var(--border));
+}
+
+.docs-content td {
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+}
+
+.docs-content tr:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Blockquotes in documentation */
+.docs-content blockquote {
+  border-left: 4px solid hsl(var(--primary) / 0.3);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Images in documentation */
+.docs-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+}
+
+/* Demo slides presentation */
+.demo-slides {
+  width: 100%;
+  height: 100vh;
+  background: #000;
+}
+
+.demo-slides .reveal {
+  font-family: var(--font-sans);
+}
+
+.demo-slides .reveal h1,
+.demo-slides .reveal h2,
+.demo-slides .reveal h3 {
+  text-transform: none;
+  font-weight: 700;
+}
+
+.demo-slides .reveal code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Speaker notes visibility */
+.demo-slides .speaker-notes {
+  position: fixed;
+  bottom: 4rem;
+  right: 1rem;
+  max-width: 400px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: hsl(var(--background) / 0.95);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  z-index: 100;
+}
+
+.demo-slides .speaker-notes.hidden {
+  display: none;
+}
+
+/* Smooth scrolling for documentation navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Print styles for documentation */
+@media print {
+  .docs-nav {
+    display: none;
+  }
+
+  .docs-content {
+    max-width: none;
+  }
+
+  .docs-content a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .docs-content a::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .docs-content {
+    max-width: 100%;
+  }
+
+  .docs-content pre {
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark mode specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .docs-content img {
+    opacity: 0.9;
+  }
+
+  .demo-slides {
+    background: #1a1a1a;
+  }
+}

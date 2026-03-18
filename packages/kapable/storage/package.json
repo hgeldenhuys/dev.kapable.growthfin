@@ -1,0 +1,18 @@
+{
+  "name": "@kapable/storage",
+  "version": "0.1.0",
+  "description": "S3/MinIO object storage for Kapable apps",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@kapable/internal": "workspace:*"
+  },
+  "license": "MIT"
+}

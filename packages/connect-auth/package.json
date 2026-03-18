@@ -1,0 +1,52 @@
+{
+  "name": "@signaldb-live/connect-auth",
+  "version": "0.1.0",
+  "description": "Authentication helpers for SignalDB Connect apps — server-side header reading and React hooks",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react.js",
+      "types": "./dist/react.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts src/server.ts src/react.tsx --outdir dist --target browser --external react --external react/jsx-runtime && bun run build:types",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "signaldb",
+    "connect",
+    "auth",
+    "authentication",
+    "react",
+    "rbac"
+  ],
+  "license": "MIT"
+}

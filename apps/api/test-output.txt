@@ -1,0 +1,115 @@
+bun test v1.3.0 (b0a6feca)
+
+src/modules/crm/routes/__tests__/enrichment-tasks.integration.test.ts:
+🔌 Creating shared database connection pool...
+✅ Database connection pool created (max: 40 connections)
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+🚀 Setting up test data...
+✅ Created test contact: e163a0a7-1e9f-441a-80a5-fbec747e32fc
+✅ Created test list: 2249f4fd-690e-4c20-a2bc-010f001009e1
+✅ Added contact to list
+✅ Created test template: 920e1d79-a1c6-46a5-998a-d1c7c82ea1de
+
+📋 Create Task Response: {
+  "success": true,
+  "task": {
+    "id": "19bcc8c8-0113-4bd8-a599-8594d8ce5ffc",
+    "workspaceId": "713dc1ca-74de-46ac-8a45-a01b2ff23230",
+    "listId": "2249f4fd-690e-4c20-a2bc-010f001009e1",
+    "type": "enrichment",
+    "status": "planned",
+    "name": "Test Enrichment Task",
+    "description": "Testing task with valid template",
+    "configuration": {
+      "templateId": "920e1d79-a1c6-46a5-998a-d1c7c82ea1de",
+      "budgetLimit": 10
+    },
+    "scheduledAt": null,
+    "startedAt": null,
+    "completedAt": null,
+    "deletedAt": null,
+    "canBeRevived": true,
+    "revivalCount": 0,
+    "createdAt": "2025-11-18T22:47:24.330Z",
+    "updatedAt": "2025-11-18T22:47:24.330Z",
+    "createdBy": null,
+    "updatedBy": null
+  }
+}
+
+❌ Invalid Template Response: {
+  "success": true,
+  "task": {
+    "id": "23c0a86d-ecd2-4860-ae57-4812e7757ab4",
+    "workspaceId": "713dc1ca-74de-46ac-8a45-a01b2ff23230",
+    "listId": "2249f4fd-690e-4c20-a2bc-010f001009e1",
+    "type": "enrichment",
+    "status": "planned",
+    "name": "Invalid Task",
+    "description": null,
+    "configuration": {
+      "templateId": "00000000-0000-0000-0000-000000000000"
+    },
+    "scheduledAt": null,
+    "startedAt": null,
+    "completedAt": null,
+    "deletedAt": null,
+    "canBeRevived": true,
+    "revivalCount": 0,
+    "createdAt": "2025-11-18T22:47:24.335Z",
+    "updatedAt": "2025-11-18T22:47:24.335Z",
+    "createdBy": null,
+    "updatedBy": null
+  }
+}
+
+🚀 Execute Task Response: {
+  "success": false,
+  "error": "Invalid state transition: cannot move from planned to running"
+}
+132 | 
+133 |     const data = await response.json();
+134 |     console.log('\n🚀 Execute Task Response:', JSON.stringify(data, null, 2));
+135 | 
+136 |     expect(response.ok).toBe(true);
+137 |     expect(data.success).toBe(true);
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/hgeldenhuys/WebstormProjects/agios/apps/api/src/modules/crm/routes/__tests__/enrichment-tasks.integration.test.ts:137:26)
+(fail) Sprint 3: Enrichment Task Integration > US 3.2: Should execute enrichment task and create job [9.08ms]
+⏳ Waiting 10 seconds for enrichment to complete...
+
+📝 Contact Custom Fields: {}
+
+📈 Template Metadata: {}
+
+🔄 Retry Task Response: {
+  "error": "Route not found"
+}
+195 |     // Retry might fail if no failed contacts, which is OK
+196 |     if (data.success) {
+197 |       expect(data.retryTask).toBeDefined();
+198 |       expect(data.retryTask.name).toContain('Retry');
+199 |     } else {
+200 |       expect(data.error).toContain('No failed contacts');
+                               ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "No failed contacts"
+Received: "Route not found"
+
+      at <anonymous> (/Users/hgeldenhuys/WebstormProjects/agios/apps/api/src/modules/crm/routes/__tests__/enrichment-tasks.integration.test.ts:200:26)
+(fail) Sprint 3: Enrichment Task Integration > US 3.3: Should create retry task for failed contacts [1.34ms]
+
+📡 Testing SSE progress stream...
+✅ SSE endpoint responds correctly
+
+ 5 pass
+ 2 fail
+ 16 expect() calls
+Ran 7 tests across 1 file. [10.12s]

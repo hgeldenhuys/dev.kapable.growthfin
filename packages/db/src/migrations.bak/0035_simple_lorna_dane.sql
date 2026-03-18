@@ -1,0 +1,1 @@
+CREATE TYPE "public"."work_item_source_type" AS ENUM('batch', 'state_machine', 'manual', 'campaign', 'workflow');

@@ -1,0 +1,26 @@
+{
+  "name": "@kapable/auth",
+  "version": "0.1.0",
+  "description": "Authentication helpers for Kapable apps",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./server": {
+      "import": "./src/server.ts",
+      "types": "./src/server.ts"
+    },
+    "./react": {
+      "import": "./src/react.ts",
+      "types": "./src/react.ts"
+    }
+  },
+  "dependencies": {
+    "@signaldb-live/connect-auth": "workspace:*"
+  },
+  "license": "MIT"
+}
